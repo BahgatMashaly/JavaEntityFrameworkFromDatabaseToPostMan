@@ -1,0 +1,231 @@
+{
+	"info": {
+		"_postman_id": "c61e2a08-1bc4-41da-8473-f5e518274016",
+		"name": "${applicationName}",
+		"description": "${applicationName}",
+		"schema": "${protocol}s://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+
+		#foreach( $table in $tables )
+          {
+            "name": "${table.javaNameFirstCharSmall}",
+            "item": [
+              {
+                "name": "findAll${table.javaName}",
+                "request": {
+                  "method": "GET",
+                  "header": [
+                    {
+                      "key": "Accept",
+                      "value": "*/*"
+                    }
+                  ],
+                  "body": {},
+                  "url": {
+                    "raw": "${protocol}://${host}:${port}${controllerPrefixWithSlashs}/${table.javaNameFirstCharSmall}s/",
+                    "protocol": "${protocol}",
+                    "host": [
+                      "${host}"
+                    ],
+                    "port": "${port}",
+                    "path": [
+						#if($controllerPrefixWithSlashs)
+                          "${controllerPrefixWithSlashs}",
+						#end
+                      "${table.javaNameFirstCharSmall}s",
+                      ""
+                    ]
+                  }
+                },
+                "response": []
+              },
+              {
+                "name": "update${table.javaName}",
+                "request": {
+                  "method": "PUT",
+                  "header": [
+                    {
+                      "key": "Accept",
+                      "value": "*/*"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": {
+                    "mode": "raw",
+                    "raw": $table.postManUpdateBody
+
+                  },
+                  "url": {
+                    "raw": "${protocol}://${host}:${port}${controllerPrefixWithSlashs}/${table.javaNameFirstCharSmall}s/",
+                    "protocol": "${protocol}",
+                    "host": [
+                      "${host}"
+                    ],
+                    "port": "${port}",
+                    "path": [
+						#if($controllerPrefixWithSlashs)
+                          "${controllerPrefixWithSlashs}",
+						#end
+                      "${table.javaNameFirstCharSmall}s",
+                      ""
+                    ]
+                  }
+                },
+                "response": []
+              },
+              {
+                "name": "create${table.javaName}",
+                "request": {
+                  "method": "POST",
+                  "header": [
+                    {
+                      "key": "Accept",
+                      "value": "*/*"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": {
+                    "mode": "raw",
+                    "raw":$table.postManCreateBody
+                  },
+                  "url": {
+                    "raw": "${protocol}://${host}:${port}${controllerPrefixWithSlashs}/${table.javaNameFirstCharSmall}s/",
+                    "protocol": "${protocol}",
+                    "host": [
+                      "${host}"
+                    ],
+                    "port": "${port}",
+                    "path": [
+						#if($controllerPrefixWithSlashs)
+                          "${controllerPrefixWithSlashs}",
+						#end
+                      "${table.javaNameFirstCharSmall}s",
+                      ""
+                    ]
+                  }
+                },
+                "response": []
+              },
+              {
+                "name": "find${table.javaName}ById",
+                "request": {
+                  "method": "GET",
+                  "header": [
+                    {
+                      "key": "Accept",
+                      "value": "*/*"
+                    }
+                  ],
+                  "body": {},
+                  "url": {
+                    "raw": "${protocol}://${host}:${port}${controllerPrefixWithSlashs}/${table.javaNameFirstCharSmall}s/:id",
+                    "protocol": "${protocol}",
+                    "host": [
+                      "${host}"
+                    ],
+                    "port": "${port}",
+                    "path": [
+						#if($controllerPrefixWithSlashs)
+                          "${controllerPrefixWithSlashs}",
+						#end
+                      "${table.javaNameFirstCharSmall}s",
+                      ":id"
+                    ],
+                    "variable": [
+                      {
+                        "key": "id",
+                        "value": "{{id}}"
+                      }
+                    ]
+                  }
+                },
+                "response": []
+              },
+              {
+                "name": "delete${table.javaName}",
+                "request": {
+                  "method": "DELETE",
+                  "header": [
+                    {
+                      "key": "Accept",
+                      "value": "*/*"
+                    }
+                  ],
+                  "body": {},
+                  "url": {
+                    "raw": "${protocol}://${host}:${port}${controllerPrefixWithSlashs}/${table.javaNameFirstCharSmall}s/:id",
+                    "protocol": "${protocol}",
+                    "host": [
+                      "${host}"
+                    ],
+                    "port": "${port}",
+                    "path": [
+						#if($controllerPrefixWithSlashs)
+                          "${controllerPrefixWithSlashs}",
+						#end
+                      "${table.javaNameFirstCharSmall}s",
+                      ":id"
+                    ],
+                    "variable": [
+                      {
+                        "key": "id",
+                        "value": "{{id}}"
+                      }
+                    ]
+                  }
+                },
+                "response": []
+              },
+              {
+                "name": "patchUpdate${table.javaName}",
+                "request": {
+                  "method": "PATCH",
+                  "header": [
+                    {
+                      "key": "Accept",
+                      "value": "*/*"
+                    },
+                    {
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }
+                  ],
+                  "body": {
+                    "mode": "raw",
+                    "raw": $table.postManPatchUpdateBody
+                  },
+                  "url": {
+                    "raw": "${protocol}://${host}:${port}${controllerPrefixWithSlashs}/${table.javaNameFirstCharSmall}s/",
+                    "protocol": "${protocol}",
+                    "host": [
+                      "${host}"
+                    ],
+                    "port": "${port}",
+                    "path": [
+						#if($controllerPrefixWithSlashs)
+                          "${controllerPrefixWithSlashs}",
+						#end
+                      "${table.javaNameFirstCharSmall}s",
+                      ""
+                    ]
+                  }
+                },
+                "response": []
+              }
+            ]
+          }
+
+          #if($foreach.index<$tables.size()-(1))
+            ,
+            #end
+		#end
+
+	]
+}

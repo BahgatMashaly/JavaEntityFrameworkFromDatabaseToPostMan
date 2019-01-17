@@ -1,0 +1,23 @@
+
+package $package ;
+
+
+
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
+#foreach( $import in $serviceImports )
+import ${import};
+#end
+
+
+
+
+@Transactional
+@Service
+public class ${table.javaName}Service extends BaseService<${table.javaName}, $PK_Type, ${table.javaName}Repository>{
+
+
+
+
+
+}

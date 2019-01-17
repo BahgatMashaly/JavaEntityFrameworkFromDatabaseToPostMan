@@ -1,0 +1,397 @@
+package $package;
+
+import com.querydsl.core.types.*;
+import com.querydsl.core.types.dsl.PathBuilder;
+import com.querydsl.jpa.HQLTemplates;
+import com.querydsl.jpa.JPQLQuery;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.querydsl.jpa.impl.JPAUpdateClause;
+import com.querydsl.jpa.sql.JPASQLQuery;
+import com.querydsl.sql.*;
+import com.querydsl.sql.dml.SQLInsertClause;
+import org.hibernate.engine.spi.SessionImplementor;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
+import org.springframework.data.jpa.repository.support.QuerydslJpaRepository;
+import org.springframework.data.querydsl.SimpleEntityPathResolver;
+import org.springframework.orm.jpa.EntityManagerFactoryInfo;
+import org.springframework.transaction.annotation.Transactional;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.io.Serializable;
+import java.lang.reflect.Field;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import static net.tedata.utils.QueryDSLUpdatePatchConverter.convertMapNeedToUpdateTOQueryDSLLists;
+
+@Transactional(readOnly = true)
+public class SimpleExtendedQueryDslJpaRepository<T, ID extends Serializable> extends QuerydslJpaRepository<T, ID>
+        implements ExtendedQueryDslJpaRepository<T, ID>  {
+
+
+
+
+    DataSource dataSource;
+
+
+
+
+
+    Configuration querydslConfiguration() {
+        SQLTemplates templates = MySQLTemplates.builder().build();
+        Configuration configuration = new Configuration(templates);
+        return configuration;
+    }
+
+
+
+    private final EntityPath<T> entityPath;
+
+
+    private final JPAQueryFactory jpaQueryFactory;
+    private final Supplier<JPASQLQuery<T>> jpaSqlFactory;
+    private final EntityManager entityManager;
+    private final JpaEntityInformation<T, ID> entityInformation;
+
+    SQLQueryFactory sqlQueryFactory;
+
+    RelationalPathBase relationalPathBase;
+
+    SimpleExtendedQueryDslJpaRepository(JpaEntityInformation<T, ID> entityInformation, EntityManager entityManager) throws SQLException {
+        super(entityInformation, entityManager, SimpleEntityPathResolver.INSTANCE);
+        this.jpaQueryFactory = new JPAQueryFactory(HQLTemplates.DEFAULT, entityManager);
+        this.entityPath = SimpleEntityPathResolver.INSTANCE.createPath(entityInformation.getJavaType());
+
+
+        relationalPathBase= new RelationalPathBase(this.entityPath.getType(), this.entityPath.getMetadata(), "","CenterCourse");
+
+
+        SQLTemplates sqlTemplates = getSQLServerTemplates(entityManager.getEntityManagerFactory());
+        this.jpaSqlFactory = () -> new JPASQLQuery<>(entityManager, sqlTemplates);
+        this.entityManager = entityManager;
+        this.entityInformation=entityInformation;
+
+
+        EntityManagerFactoryInfo info = (EntityManagerFactoryInfo) entityManager.getEntityManagerFactory();
+
+        this.dataSource= info.getDataSource();
+
+        Configuration configuration = new Configuration(sqlTemplates);
+        this.sqlQueryFactory = new SQLQueryFactory(this.querydslConfiguration(), this.dataSource);
+
+
+
+    }
+
+
+
+    @SafeVarargs
+    @Override
+    public final List<T> save(T... iterable) {
+        return saveAll(Arrays.asList(iterable));
+    }
+
+    @Override
+    public <O> O query(Function<JPAQuery<?>, O> query) {
+        return query.apply(jpaQueryFactory.query());
+    }
+
+    @Transactional
+    @Override
+    public void update(Consumer<JPAUpdateClause> update) {
+
+        update.accept(jpaQueryFactory.update(entityPath));
+    }
+
+
+
+    @Transactional
+    void insert(Consumer<SQLInsertClause> insert) {
+
+        insert.accept(this.sqlQueryFactory.insert(relationalPathBase));
+
+
+    }
+
+
+    @Override
+    public Long save(Map<String, Object> mapKeysValuesNeedToInsert)
+    {
+        mapKeysValuesNeedToInsert.forEach((k,v)->
+        {
+            if(v.getClass().getTypeName().equals(LinkedHashMap.class.getTypeName()))
+            {
+                throw new RuntimeException("Can't use patch update with nested object");
+            }
+            System.out.println("Key : " + k + " Value : " + v.getClass().getTypeName());
+        });
+
+        try {
+            Iterable<String>  ids=   this.entityInformation.getIdAttributeNames();
+
+            int counter = 0;
+            String idColumnName="";
+            for (String i : ids) {
+                counter++;
+                idColumnName=i;
+            }
+            if(counter>1||idColumnName.equals("") )
+            {
+                throw  new Exception("can't update table with multi id columnsList, or the table don't include PK column, or you didn't send the id column when from the client app. Bahgat ....");
+            }
+
+            // entityManager.find(Student,)
+            PathBuilder<?> entityPath = new PathBuilder(this.entityPath.getType(), this.entityPath.getMetadata());
+
+            // String idColumnName=this.getPKColumnName(target.getClass());
+
+
+            List[] keysAndValuesForUpdate = convertMapNeedToUpdateTOQueryDSLLists(entityPath, mapKeysValuesNeedToInsert, idColumnName);
+            final Long[] efecctedRoes = {0L};
+
+
+            SQLInsertClause tempquery =this.sqlQueryFactory.insert(this.relationalPathBase);
+
+            for (Map.Entry<String, ?> item : mapKeysValuesNeedToInsert.entrySet()) {
+
+                tempquery.set(entityPath.get(item.getKey()),item.getValue());
+            }
+
+            return    tempquery.execute();
+
+//this.insert(query->{
+//    efecctedRoes[0] =   query
+//            .set(entityPath.get("centerId"),2)
+//            .set(entityPath.get("courseId"),5)
+//            .execute();
+//});
+//
+//
+//            return   efecctedRoes[0];
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
+
+//    public Long updateReturnEffectedRowsCount(Consumer<JPAUpdateClause> update) {
+//
+//        update.accept(jpaQueryFactory.update(entityPath));
+//
+//        Long xx= jpaQueryFactory.update(entityPath).execute();
+//        return xx;
+//    }
+
+
+
+
+
+
+//    @Override
+//    public void optionalUpdate(Consumer<JPAUpdateClause> update) {
+//        update.accept(jpaQueryFactory.update(entityPath));
+//    }
+
+//    @Override
+//    public long updateReturnEfectedRow(Consumer<OptionalJPAUpdateClause> update) {
+//
+//        update.accept(jpaQueryFactory.update(entityPath).execute());
+//        return  jpaQueryFactory.update(entityPath).execute();
+//    }
+
+    @Transactional
+    @Override
+    public long deleteWhere(Predicate predicate) {
+
+        return jpaQueryFactory.delete(entityPath).where(predicate).execute();
+    }
+
+
+
+
+    @Override
+    public <O> O jpaSqlQuery(Function<JPASQLQuery<T>, O> query) {
+        return query.apply(jpaSqlFactory.get());
+    }
+
+    @Override
+    public SubQueryExpression<T> jpaSqlSubQuery(Function<JPASQLQuery<T>, SubQueryExpression<T>> query) {
+        return jpaSqlQuery(query);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected JPQLQuery<T> createQuery(Predicate... predicate) {
+        return (JPQLQuery<T>) super.createQuery(predicate);
+    }
+
+    @Transactional
+    @Override
+    public <O> O executeStoredProcedure(String name, Function<StoredProcedureQueryBuilder, O> query) {
+        return query.apply(new StoredProcedureQueryBuilder(name, entityManager));
+    }
+
+    private SQLTemplates getSQLServerTemplates(EntityManagerFactory entityManagerFactory) throws SQLException {
+        DatabaseMetaData databaseMetaData = getDatabaseMetaData(entityManagerFactory.createEntityManager());
+        return new SQLTemplatesRegistry().getTemplates(databaseMetaData);
+    }
+
+    private DatabaseMetaData getDatabaseMetaData(EntityManager entityManager) throws SQLException {
+        SessionImplementor sessionImplementor = entityManager.unwrap(SessionImplementor.class);
+        DatabaseMetaData metaData = sessionImplementor.connection().getMetaData();
+        entityManager.close();
+        return metaData;
+    }
+
+
+
+
+
+
+
+
+
+    @Transactional
+    @Override
+    // throwExeptionIfNotFount يعني هيجيبه , يبقى اشتغل بالطريقة العادية
+    public void updateWithPatch(Map<String, Object> mapKeysValuesNeedToUpdate ) {
+        updateWithPatch(mapKeysValuesNeedToUpdate, null);
+    }
+
+
+    // throwExeptionIfNotFount يعني هيجيبه , يبقى اشتغل بالطريقة العادية
+
+    @Transactional
+    @Override
+    public void updateWithPatch(Map<String, Object> mapKeysValuesNeedToUpdate, ID id) {
+
+        mapKeysValuesNeedToUpdate.forEach((k,v)->
+        {
+            if(v!=null) {
+                if (v.getClass().getTypeName().equals(LinkedHashMap.class.getTypeName())) {
+                    throw new RuntimeException("Can't use patch update with nested object throw patch update");
+                }
+            }
+           // System.out.println("Key : " + k + " Value : " + v.getClass().getTypeName());
+        });
+
+        try {
+            Iterable<String>  ids=   this.entityInformation.getIdAttributeNames();
+
+            int counter = 0;
+            String idColumnName="";
+            for (String i : ids) {
+                counter++;
+                idColumnName=i;
+            }
+            if(counter>1||idColumnName.equals("") )
+            {
+                throw  new Exception("can't update table with multi id columnsList, or the table don't include PK column, or you didn't send the id column when from the client app. Bahgat ....");
+            }
+
+            // entityManager.find(Student,)
+            PathBuilder<?> pathBuilder = new PathBuilder(this.entityPath.getType(), this.entityPath.getMetadata());
+
+            // String idColumnName=this.getPKColumnName(target.getClass());
+            if(id==null)
+            {
+                id=  (ID)mapKeysValuesNeedToUpdate.get(idColumnName);
+            }
+            PathBuilder<?> idPath =  pathBuilder.get(idColumnName);
+
+            Expression whereExpression=(Expression)ConstantImpl.create(id);
+            List[] keysAndValuesForUpdate = convertMapNeedToUpdateTOQueryDSLLists(pathBuilder, mapKeysValuesNeedToUpdate, idColumnName);
+            final Long[] efecctedRoes = {0L};
+
+            JPAUpdateClause tempquery =this.jpaQueryFactory.update(this.entityPath);
+
+            tempquery.where(idPath.eq(whereExpression));
+
+            for (Map.Entry<String, ?> item : mapKeysValuesNeedToUpdate.entrySet()) {
+                if(item.getValue()==null)
+                {
+                    tempquery.setNull(pathBuilder.get(item.getKey()));
+                }
+                else
+                {
+                    tempquery.set(pathBuilder.get(item.getKey()),item.getValue());
+                }
+            }
+
+            tempquery.execute();
+
+//            this.update(query ->
+//                    {
+//                        efecctedRoes[0] =   query
+////                .where(QStudent.student.id.eq(Long.valueOf(10)))
+//                                .where(idPath.eq(whereExpression))
+//
+//                                .set(keysAndValuesForUpdate[0], keysAndValuesForUpdate[1])
+//                                .execute();
+//                    }
+//            );
+
+//            return   efecctedRoes[0];
+
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
+        }
+
+
+    }
+
+
+    @Override
+    public boolean isIdSet(T entity)
+    {
+        try {
+
+
+            Iterable<String>  ids=   this.entityInformation.getIdAttributeNames();
+
+
+            int counter = 0;
+            String idColumnName="";
+            for (String i : ids) {
+                counter++;
+                idColumnName=i;
+            }
+            Field idField = entity.getClass().getDeclaredField(idColumnName);
+            idField.setAccessible(true);
+
+            Object value= idField.get(entity);
+            if(value!=null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
+
+    }
+}

@@ -1,0 +1,23 @@
+
+package $package ;
+
+
+
+
+import org.springframework.stereotype.Repository;
+#foreach( $import in $repositoryImports )
+import ${import};
+#end
+
+
+
+
+
+
+@Repository
+public interface ${table.javaName}Repository extends ExtendedQueryDslJpaRepository< ${table.javaName} , $PK_Type > {
+
+
+
+
+}

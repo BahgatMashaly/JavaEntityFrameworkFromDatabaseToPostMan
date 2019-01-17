@@ -1,0 +1,443 @@
+package $package;
+
+
+import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.SubQueryExpression;
+import com.querydsl.jpa.impl.JPAQuery;
+import com.querydsl.jpa.sql.JPASQLQuery;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
+import java.io.Serializable;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
+
+#foreach( $import in $baseServiceImports )
+import ${import};
+#end
+
+@Transactional
+public   abstract class BaseService<E,ID extends Serializable, R extends ExtendedQueryDslJpaRepository<E, ID>>    implements Serializable   {
+
+    @Autowired
+    protected R  baseRepository;
+
+
+
+
+//    find all
+    
+    public Iterable<E> findAll(Predicate predicate) {
+        return baseRepository.findAll(predicate);
+    }
+
+    
+    public Iterable<E> findAll(Predicate predicate, Sort sort) {
+        return baseRepository.findAll(predicate,sort);
+    }
+
+
+    public Iterable<E> findAll(Predicate predicate, OrderSpecifier... orders) {
+        return baseRepository.findAll(predicate,orders);
+    }
+
+    
+    public Iterable<E> findAll(OrderSpecifier... orders) {
+        return baseRepository.findAll(orders);
+    }
+
+    
+    public List findAll() {
+        return baseRepository.findAll();
+    }
+
+    
+    public List<E> findAll(Sort sort) {
+        return baseRepository.findAll(sort);
+    }
+
+    
+    public List<E> findAllById(Iterable iterable) {
+
+        return baseRepository.findAllById(iterable);
+    }
+
+
+    
+    public List<E> findAll(Example example) {
+        return baseRepository.findAll(example);
+    }
+
+    
+    public List<E> findAll(Example example, Sort sort) {
+        return baseRepository.findAll(example,sort);
+    }
+    
+    public Page findAll(Pageable pageable) {
+        return baseRepository.findAll(pageable);
+    }
+
+
+
+
+    public Page findAll(Predicate predicate, Pageable pageable) {
+        return baseRepository.findAll(predicate,pageable);
+    }
+
+    
+    public Page findAll(Example example, Pageable pageable) {
+        return baseRepository.findAll(example,pageable);
+    }
+
+
+/////////////////////////////////////
+    public E getOne(ID id) {
+        return   baseRepository.getOne(id);
+    }
+
+
+
+//
+//    public Optional<E> findOne(Predicate predicate) {
+//        return   baseRepository.findOne(predicate);
+//    }
+
+
+    public Optional<E> findById(ID id) {
+        return   baseRepository.findById(id);
+    }
+
+
+    ////////////////////////////////////////////////////////////////
+
+
+
+
+    public E  save(E entity) {
+        return baseRepository.save( entity);
+    }
+
+    public  E  saveAndFlush(E entity) {
+        return baseRepository.saveAndFlush( entity);
+    }
+
+    public Iterable<E>  save(E... entities) {
+        return baseRepository.save( entities);
+    }
+
+    public   List<E>   saveAll(Iterable<E> entities) {
+        return baseRepository.saveAll( entities);
+    }
+
+
+
+
+
+ ////////////////////////////////////////////////////////
+
+
+    
+    public void flush() {
+          baseRepository.flush();
+    }
+
+    
+
+
+//////////////////////////////////////////////////////////////////////////////////
+
+
+    ////////////////////////////////////////////////////
+
+
+
+    public <O> O query(Function<JPAQuery<?>, O> query) {
+        return baseRepository.query(query);
+     }
+
+
+
+
+
+
+
+
+    public long deleteWhere(Predicate predicate) {
+        return baseRepository.deleteWhere(predicate);
+    }
+
+
+
+    public <O> O jpaSqlQuery(Function<JPASQLQuery<E>, O> query)  {
+        return baseRepository.jpaSqlQuery(query);
+    }
+
+    
+    public   SubQueryExpression<E> jpaSqlSubQuery(Function<JPASQLQuery<E>, SubQueryExpression<E>> query) {
+          return baseRepository.jpaSqlSubQuery(query);
+    }
+
+
+    public <O> O executeStoredProcedure(String name, Function<StoredProcedureQueryBuilder, O> query) {
+        return baseRepository.executeStoredProcedure(name,query);
+    }
+
+
+    
+    public void deleteInBatch(Iterable iterable) {
+        baseRepository.deleteInBatch(iterable);
+    }
+
+    
+    public void deleteAllInBatch() {
+        baseRepository.deleteAllInBatch();
+    }
+
+    
+
+    
+    public long count(Predicate predicate) {
+        return   baseRepository.count(predicate);
+    }
+
+    
+    public boolean exists(Predicate predicate) {
+        return   baseRepository.exists(predicate);
+    }
+
+
+
+
+
+    
+
+
+    
+    public boolean existsById(ID id) {
+        return   baseRepository.existsById(id);
+    }
+
+    
+    public long count() {
+        return   baseRepository.count();
+    }
+
+    
+    public void deleteById(ID id) {
+        baseRepository.deleteById(id);
+    }
+
+    
+    public void delete(E entity) {
+        baseRepository.delete(entity);
+    }
+
+    
+    public void deleteAll(Iterable<? extends E>  iterable) {
+        baseRepository.deleteAll(iterable);
+    }
+
+    
+    public void deleteAll() {
+        baseRepository.deleteAll();
+    }
+
+    
+    public <S extends E> Optional<S>  findOne(Example<S> example) {
+        return     baseRepository.findOne(example);
+
+    }
+
+
+
+    
+    public <S extends E> long count(Example<S> example) {
+        return     baseRepository.count(example);
+    }
+
+    
+    public <S extends E> boolean exists(Example<S> example) {
+        return     baseRepository.exists(example);
+    }
+
+
+
+//    public List<Student> getStudentWhereNameIn(String... names) {
+//
+//        return baseRepository.getStudentWhereNameInxxx(names);
+//
+//    }
+
+
+
+//    public Long  save(Map<String, Object> mapKeysValuesNeedToInsert) {
+//        return baseRepository.save( mapKeysValuesNeedToInsert);
+//    }
+
+    public  void updateWithPatch(Map<String, Object> mapKeysValuesNeedToUpdate ){
+          this.baseRepository.updateWithPatch(mapKeysValuesNeedToUpdate);
+
+    }
+
+    public  void updateWithPatch(Map<String, Object> mapKeysValuesNeedToUpdate, ID id){
+          this.baseRepository.updateWithPatch(mapKeysValuesNeedToUpdate,id);
+    }
+
+        public boolean isIdSet(E entity)
+    {
+        return this.baseRepository.isIdSet(entity);
+ }
+
+
+
+
+
+
+
+
+//    public boolean isIdSet(E entity)
+//    {
+//        try {
+//
+//
+//            Advised advised = (Advised)baseRepository;
+//
+//            SimpleExtendedQueryDslJpaRepository target =(SimpleExtendedQueryDslJpaRepository) advised.getTargetSource().getTarget();
+//
+//
+//            //Object handler = Proxy.getInvocationHandler(baseRepository);
+////            Class handlerClass = handler.getClass();
+//            Field objField = target.getClass().getDeclaredField("path");
+//            objField.setAccessible(true);
+//            EntityPath path = (EntityPath) objField.get(target);
+//
+//            Object cc=target.getClass().getSuperclass();
+//
+//            Field entityInformationField = target.getClass().getDeclaredField("entityInformation");
+//            entityInformationField.setAccessible(true);
+//            JpaMetamodelEntityInformation jpaMetamodelEntityInformation = (JpaMetamodelEntityInformation) entityInformationField.get(target);
+//            Iterable<String>  ids=   jpaMetamodelEntityInformation.getIdAttributeNames();
+//
+//
+//            int counter = 0;
+//            String idColumnName="";
+//            for (String i : ids) {
+//                counter++;
+//                idColumnName=i;
+//            }
+//            Field idField = entity.getClass().getDeclaredField(idColumnName);
+//            idField.setAccessible(true);
+//
+//            Object value= idField.get(entity);
+//            if(value!=null)
+//            {
+//                return true;
+//            }
+//            else
+//            {
+//                return false;
+//            }
+//
+//        }
+//        catch (Exception ex)
+//        {
+//            return false;
+//        }
+//
+//    }
+
+
+//    // throwExeptionIfNotFount يعني هيجيبه , يبقى اشتغل بالطريقة العادية
+//    public Long updateWithPatch(Map<String, Object> mapKeysValuesNeedToUpdate ) {
+//        return updateWithPatch(mapKeysValuesNeedToUpdate, null);
+//    }
+//
+//    // throwExeptionIfNotFount يعني هيجيبه , يبقى اشتغل بالطريقة العادية
+//    public Long updateWithPatch(Map<String, Object> mapKeysValuesNeedToUpdate, ID id) {
+//
+//        mapKeysValuesNeedToUpdate.forEach((k,v)->
+//        {
+//            if(v.getClass().getTypeName().equals(LinkedHashMap.class.getTypeName()))
+//            {
+//                throw new RuntimeException("Can't use patch update with nested object");
+//            }
+//            System.out.println("Key : " + k + " Value : " + v.getClass().getTypeName());
+//        });
+//
+//
+//        Advised advised = (Advised)baseRepository;
+//        try {
+//
+//            SimpleExtendedQueryDslJpaRepository target =(SimpleExtendedQueryDslJpaRepository) advised.getTargetSource().getTarget();
+//
+//
+//            //Object handler = Proxy.getInvocationHandler(baseRepository);
+////            Class handlerClass = handler.getClass();
+//            Field objField = target.getClass().getDeclaredField("path");
+//            objField.setAccessible(true);
+//            EntityPath path = (EntityPath) objField.get(target);
+//
+//            Object cc=target.getClass().getSuperclass();
+//
+//            Field entityInformationField = target.getClass().getDeclaredField("entityInformation");
+//            entityInformationField.setAccessible(true);
+//            JpaMetamodelEntityInformation jpaMetamodelEntityInformation = (JpaMetamodelEntityInformation) entityInformationField.get(target);
+//            Iterable<String>  ids=   jpaMetamodelEntityInformation.getIdAttributeNames();
+//
+//            int counter = 0;
+//            String idColumnName="";
+//            for (String i : ids) {
+//                counter++;
+//                idColumnName=i;
+//            }
+//            if(counter>1||idColumnName.equals("") )
+//            {
+//                throw  new Exception("can't update table with multi id columnsList, or the table don't include PK column, or you didn't send the id column when from the client app. Bahgat ....");
+//            }
+//
+//            // entityManager.find(Student,)
+//            PathBuilder<?> entityPath = new PathBuilder(path.getType(), path.getMetadata());
+//
+//            // String idColumnName=this.getPKColumnName(target.getClass());
+//            if(id==null)
+//            {
+//                id=  (ID)mapKeysValuesNeedToUpdate.get(idColumnName);
+//            }
+//            PathBuilder<?> idPath =  entityPath.get(idColumnName);
+//
+//            Expression whereExpression=(Expression)ConstantImpl.create(id);
+//            List[] keysAndValuesForUpdate = convertMapNeedToUpdateTOQueryDSLLists(entityPath, mapKeysValuesNeedToUpdate, idColumnName);
+//            final Long[] efecctedRoes = {0L};
+//            baseRepository.update(query ->
+//                    {
+//                        efecctedRoes[0] =   query
+////                .where(QStudent.student.id.eq(Long.valueOf(10)))
+//                                .where(idPath.eq(whereExpression))
+//                                .set(keysAndValuesForUpdate[0], keysAndValuesForUpdate[1])
+//                                .execute();
+//                    }
+//            );
+//
+//            return   efecctedRoes[0];
+//
+//
+//
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            throw new RuntimeException(e.getMessage());
+//        }
+//
+//
+//    }
+
+
+
+
+
+}

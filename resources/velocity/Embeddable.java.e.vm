@@ -1,0 +1,35 @@
+
+package $package ;
+
+
+
+import lombok.*;
+import javax.persistence.*;
+import java.io.Serializable;
+#foreach( $import in $embeddableClass.imports )
+import ${import};
+#end
+
+
+@AllArgsConstructor
+@NoArgsConstructor
+@EqualsAndHashCode
+@Data
+@Embeddable
+public class $embeddableClass.javaName   implements Serializable {
+
+#foreach( $column in $embeddableClass.columnsList )
+   #foreach( $annoutation in $column.conditionalAnnotationsList )
+       #if ($annoutation.indexOf("@JsonProperty(access") ==-1)
+   $annoutation
+       #end
+   #end
+   private $column.javaSQLDataTypeMap.javaType $column.columnJavaNameFirstCharSmall ;
+
+#end
+
+}
+
+
+
+

@@ -1,0 +1,192 @@
+
+package $package ;
+
+
+
+import lombok.*;
+import javax.persistence.*;
+import java.io.Serializable;
+#foreach( $import in $table.imports )
+import ${import};
+#end
+
+
+@Builder
+@Data
+@Entity
+@EqualsAndHashCode
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class $table.javaName   implements Serializable {
+
+
+#if ($table.embeddedId )
+    @EmbeddedId
+    #if ($table.hideManyToOneColumn==false)
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    #end
+    private $table.embeddedId.javaName $table.embeddedId.javaNameFirstCharSmall ;
+#end
+
+
+#foreach( $column in $table.columnsList )
+#if ($column.embededInEmbeddableClass==false && $column.hideCosItsManyToOneColumn==false)
+   #foreach( $annoutation in $column.conditionalAnnotationsList )
+   $annoutation
+   #end
+   private $column.javaSQLDataTypeMap.javaType $column.columnJavaNameFirstCharSmall ;
+
+#end
+#end
+
+
+
+##One To Many Owning
+#foreach( $objectOneToMany in $table.objectOneToManyList )
+     @EqualsAndHashCode.Exclude
+     @ToString.Exclude
+     @JsonIgnore
+     @OneToMany(mappedBy = "${objectOneToMany.mappedByTheProbertyItsMyNameStartWithSmall}" )
+     private Set<${objectOneToMany.refreanceTableJavaName}> ${objectOneToMany.refreanceTableJavaNameFirstCharSmall}s;
+
+     public void add${objectOneToMany.refreanceTableJavaName}($objectOneToMany.refreanceTableJavaName $objectOneToMany.refreanceTableJavaNameFirstCharSmall) {
+         this.${objectOneToMany.refreanceTableJavaNameFirstCharSmall}s.add($objectOneToMany.refreanceTableJavaNameFirstCharSmall);
+         ${objectOneToMany.refreanceTableJavaNameFirstCharSmall}.set${objectOneToMany.thisJavaNameForSetItSelfInMany}(this);
+     }
+
+     public void remove${objectOneToMany.refreanceTableJavaName}($objectOneToMany.refreanceTableJavaName $objectOneToMany.refreanceTableJavaNameFirstCharSmall) {
+         this.${objectOneToMany.refreanceTableJavaNameFirstCharSmall}s.remove($objectOneToMany.refreanceTableJavaNameFirstCharSmall);
+         ${objectOneToMany.refreanceTableJavaNameFirstCharSmall}.set${objectOneToMany.thisJavaNameForSetItSelfInMany}(null);
+    }
+
+
+#end
+
+
+
+##Many To One
+#foreach( $objectManyToOne in $table.objectManyToOneList )
+    #if ($table.hideManyToOneColumn==false || $objectManyToOne.isJoinColumnsEmbededInEmbeddableClass==true)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @ManyToOne(optional = $objectManyToOne.optional)
+        #if( $objectManyToOne.joinColumns.size() == 1)
+            #foreach( $joinColumn in $objectManyToOne.joinColumns)
+            @JoinColumn(name="${joinColumn.columnSQlName}", referencedColumnName="${joinColumn.referenceColumnName}",updatable = false,insertable = false)
+            #end
+        #else
+        @JoinColumns({
+            #foreach( $joinColumn in $objectManyToOne.joinColumns)
+            @JoinColumn(name="${joinColumn.columnSQlName}", referencedColumnName="${joinColumn.referenceColumnName}",updatable = false,insertable = false),
+            #end
+        })
+        #end
+    private $objectManyToOne.refreanceTableJavaName $objectManyToOne.refreanceTableJavaNameFirstCharSmall;
+
+    #else
+    @ManyToOne(optional = $objectManyToOne.optional)
+        #if( $objectManyToOne.joinColumns.size() == 1)
+            #foreach( $joinColumn in $objectManyToOne.joinColumns)
+            @JoinColumn(name="${joinColumn.columnSQlName}", referencedColumnName="${joinColumn.referenceColumnName}")
+            #end
+        #else
+        @JoinColumns({
+            #foreach( $joinColumn in $objectManyToOne.joinColumns)
+            @JoinColumn(name="${joinColumn.columnSQlName}", referencedColumnName="${joinColumn.referenceColumnName}"),
+            #end
+        })
+        #end
+    private $objectManyToOne.refreanceTableJavaName $objectManyToOne.refreanceTableJavaNameFirstCharSmall;
+
+    #end
+#end
+
+
+##Many To Many Owning
+#foreach( $objectManyToManyOwning in $table.objectManyToManyOwningList )
+    @ManyToMany(cascade = {  CascadeType.PERSIST, CascadeType.MERGE  })
+    @JoinTable(name = "${objectManyToManyOwning.directJoinTableWhichIsManyToManyTable.SqlName}",
+    #if( $objectManyToManyOwning.joinColumns.size() == 1)
+        #foreach( $joinColumn in $objectManyToManyOwning.joinColumns)
+        joinColumns= @JoinColumn(name="${joinColumn.columnSQlName}", referencedColumnName="${joinColumn.referenceColumnName}",updatable = false,insertable = false),
+        #end
+    #else
+   joinColumns={
+        #foreach( $joinColumn in $objectManyToManyOwning.joinColumns)
+        @JoinColumn(name="${joinColumn.columnSQlName}", referencedColumnName="${joinColumn.referenceColumnName}",updatable = false,insertable = false),
+        #end
+          },
+    #end
+    #if( $objectManyToManyOwning.inverseJoinColumns.size() == 1)
+        #foreach( $inverseJoinColumn in $objectManyToManyOwning.inverseJoinColumns)
+   inverseJoinColumns= @JoinColumn(name="${inverseJoinColumn.columnSQlName}", referencedColumnName="${inverseJoinColumn.referenceColumnName}",updatable = false,insertable = false) )
+        #end
+    #else
+    inverseJoinColumns={
+        #foreach( $inverseJoinColumn in $objectManyToManyOwning.inverseJoinColumns)
+         @JoinColumn(name="${inverseJoinColumn.columnSQlName}", referencedColumnName="${inverseJoinColumn.referenceColumnName}",updatable = false,insertable = false),
+        #end
+            })
+    #end
+   private Set<${objectManyToManyOwning.indDirectDirectJoinTable.javaName}> ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall}s = new HashSet<>();
+
+   public void add${objectManyToManyOwning.indDirectDirectJoinTable.javaName}(${objectManyToManyOwning.indDirectDirectJoinTable.javaName} ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall}) {
+        ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall}s.add(${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall});
+        ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall}.get${table.javaName}s().add(this);
+   }
+
+   public void remove${objectManyToManyOwning.indDirectDirectJoinTable.javaName}(${objectManyToManyOwning.indDirectDirectJoinTable.javaName} ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall}) {
+        ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall}s.remove( ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall});
+        ${objectManyToManyOwning.indDirectDirectJoinTable.javaNameFirstCharSmall}.get${table.javaName}s().remove(this);
+   }
+
+
+#end
+
+##Many To Many Non Owning
+#foreach( $objectManyToManyNonOwning in $table.objectManyToManyNonOwningList )
+    @ManyToMany(mappedBy = "${table.javaNameFirstCharSmall}s")
+    private Set<${objectManyToManyNonOwning.ownTable.javaName}> ${objectManyToManyNonOwning.ownTable.javaNameFirstCharSmall}s = new HashSet<>();
+
+
+#end
+
+
+
+##One To One Parent
+#foreach( $objectOneToOneParent in $table.objectOneToOneParentList )
+@OneToOne(mappedBy = "${table.javaNameFirstCharSmall}", cascade = CascadeType.ALL,  fetch = FetchType.LAZY, optional = false)
+private $objectOneToOneParent.refreanceTableJavaName $objectOneToOneParent.refreanceTableJavaNameFirstCharSmall;
+
+public void set${objectOneToOneParent.refreanceTableJavaName}($objectOneToOneParent.refreanceTableJavaName $objectOneToOneParent.refreanceTableJavaNameFirstCharSmall) {
+if ($objectOneToOneParent.refreanceTableJavaNameFirstCharSmall == null) {
+if (this.${objectOneToOneParent.refreanceTableJavaNameFirstCharSmall} != null) {
+this.${objectOneToOneParent.refreanceTableJavaNameFirstCharSmall}.set${table.javaName}(null);
+}
+}
+else {
+    ${objectOneToOneParent.refreanceTableJavaNameFirstCharSmall}.set${table.javaName}(this);
+}
+this.$objectOneToOneParent.refreanceTableJavaNameFirstCharSmall = $objectOneToOneParent.refreanceTableJavaNameFirstCharSmall;
+}
+
+
+#end
+
+
+##One To One Details
+#foreach( $objectOneToOneDetails in $table.objectOneToOneDetailsList )
+@OneToOne(fetch = FetchType.LAZY)
+@MapsId
+private $objectOneToOneDetails.refreanceTableJavaName $objectOneToOneDetails.refreanceTableJavaNameFirstCharSmall;
+
+
+#end
+
+
+
+}
+
+
+
+
