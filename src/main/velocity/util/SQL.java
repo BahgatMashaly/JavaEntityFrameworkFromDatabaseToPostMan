@@ -68,7 +68,7 @@ public class SQL {
 
     //////////////////
 
-public static String mySQLselectStatment="SELECT c.table_name as tableName,\n" +
+public static String MySQLSelectStatment="SELECT c.table_name as tableName,\n" +
         "       c.ORDINAL_POSITION as columnOrder, \n" +
          "       c.COLUMN_NAME as columnName,\n" +
          "\n" +
@@ -132,10 +132,10 @@ public static String mySQLselectStatment="SELECT c.table_name as tableName,\n" +
 
 
 
-public static String   sqlStatmentForMSSQL =" with fcc as\n" +
+public static String   MSSQLSelectStatment =" with fcc as\n" +
          "(\n" +
          "\n" +
-         "SELECT \n" +
+         "SELECT  \n" +
          " t.name as tableName, \n" +
         "c.column_id AS columnOrder ,\n" +
          "c.name AS columnName,\n" +
@@ -143,7 +143,7 @@ public static String   sqlStatmentForMSSQL =" with fcc as\n" +
          "   is_identity as isAutoIncrement,\n" +
          "    c.is_nullable as  isNullable,\n" +
          "\ttyp.name as columnSqlDataType,\n" +
-         "\tcase when typ.name='nvarchar' or   typ.name='nchar' then c.max_length/2 else c.max_length end as max_length,\n" +
+         "\tcase when typ.name='nvarchar' or   typ.name='nchar' then c.max_length/2 else c.max_length end as maxlength,\n" +
          "     c.precision,\n" +
          "   c.scale,\n" +
          "   ic.object_id,\n" +
@@ -165,7 +165,7 @@ public static String   sqlStatmentForMSSQL =" with fcc as\n" +
          "LEFT OUTER JOIN sys.foreign_key_columns AS fc ON fc.parent_object_id = c.object_id AND COL_NAME(fc.parent_object_id, fc.parent_column_id) = c.name\n" +
          "LEFT OUTER JOIN sys.foreign_keys AS f\n" +
          " ON f.parent_object_id = c.object_id AND fc.constraint_object_id = f.object_id)\n" +
-         " select fcc.tableName,fcc.columnName,fcc.isPrimaryKey,fcc.isAutoIncrement,fcc.isNullable,fcc.columnSqlDataType,fcc.max_length,fcc.precision,fcc.scale,fcc.isForeignKey,fcc.referenceTableName,fcc.referenceColumnName ,th_indexes.is_unique as isUnique from fcc \n" +
+         " select fcc.tableName,fcc.columnName,fcc.isPrimaryKey,fcc.isAutoIncrement,fcc.isNullable,fcc.columnSqlDataType,fcc.maxlength,fcc.precision,fcc.scale,fcc.isForeignKey,fcc.referenceTableName,fcc.referenceColumnName ,th_indexes.is_unique as isUnique from fcc \n" +
          "\n" +
          " left outer  join ( select x.object_id, x.index_id, column_id,x.is_primary_key ,x.is_unique ,x.is_unique_constraint  from  sys.indexes x inner JOIN sys.index_columns icx on icx.object_id = x.object_id AND x.index_id = icx.index_id )\n" +
          " as th_indexes on fcc.column_id =th_indexes.column_id and fcc.object_id =th_indexes.object_id and fcc.index_id=th_indexes.index_id\n" +
@@ -190,7 +190,7 @@ public static String   sqlStatmentForMSSQL =" with fcc as\n" +
 //        is_identity as isAutoIncrement,
 //        c.is_nullable as  isNullable,
 //        typ.name as columnSqlDataType,
-//        case when typ.name='nvarchar' or   typ.name='nchar' then c.max_length/2 else c.max_length end as max_length,
+//        case when typ.name='nvarchar' or   typ.name='nchar' then c.max_length/2 else c.max_length end as maxlength,
 //        c.precision,
 //        c.scale,
 //
