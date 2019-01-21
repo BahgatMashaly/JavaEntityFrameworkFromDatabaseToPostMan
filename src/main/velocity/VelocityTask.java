@@ -38,10 +38,10 @@ public class VelocityTask {
     String parentPackageName="net.tedata.MVSC";
     boolean protectRest=false;
 
-    String modelFolderPackageName="model";
-    String repositoryFolderPackageName="repository";
-    String serviceFolderPackageName="service";
-    String controllerFolderPackageName="controller";
+    String modelFolderPackageName="entities";
+    String repositoryFolderPackageName="repositories";
+    String serviceFolderPackageName="services";
+    String controllerFolderPackageName="controllers";
     String baseRepositoryName="ExtendedQueryDslJpaRepository";
       boolean    hideManyToOneColumn=false;
     String databaseType;
@@ -550,9 +550,16 @@ this.copyServiceBase();
         {
             HashMap<String,Table> tables= new HashMap<>();
 
+if(this.databaseType=="MYSQL")
+{
+    rs= this.connect().createStatement().executeQuery(SQL.MySQLSelectStatment);
+}
+else
+{
+    rs= this.connect().createStatement().executeQuery(SQL.MSSQLSelectStatment);
+}
 
 
-            rs= this.connect().createStatement().executeQuery(SQL.mySQLselectStatment);
 
             while (rs.next())
             {
@@ -583,7 +590,12 @@ this.copyServiceBase();
                     newColumn.setMaxlength(Integer.valueOf( rs.getBigDecimal("maxlength").intValue()));
 
                 }
-                newColumn.setComment(rs.getString("comment"));
+if(this.databaseType=="MYSQL")
+{
+    newColumn.setComment(rs.getString("comment"));
+}
+
+
                 newColumn.setUnique(rs.getBoolean("isUnique"));
                 newColumn.setPrimaryKey(rs.getBoolean("isPrimaryKey"));
                 newColumn.setForeignKey(rs.getBoolean("isForeignKey"));
