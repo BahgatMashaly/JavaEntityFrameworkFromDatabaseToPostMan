@@ -11,8 +11,10 @@ Auto generate  model, repository, service, controller and postman file
 
 
 
-Note:
-the option "Insert update ManyToOne by Object" : it's about how it will manage the ManyToOne relation in the model file that will effect how you will insert or update the object
+USING:
+- set "resources" directory as resource root
+- The option "Insert update ManyToOne by Object" : it's about how it will manage the ManyToOne relation in the model file that will effect how you will insert or update the object.
+
 
 example for manage the ManyToOne by object
 
