@@ -39,4 +39,7 @@ ManyToOneTableID:xx
 - currently the genrated postman file mange ManyToOne by id only
 
 
+       // jdbc:sqlserver://localhost;databaseName=PRIVACY;user=sa;password=123
+
+
 
